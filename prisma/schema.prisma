@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  password      String
+  createdAt     DateTime       @default(now())
+
+  profile       Profile?
+  periodLogs    PeriodLog[]
+  ovulationLogs OvulationLog[]
+  cycles        Cycle[]
+}
+
+model Profile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dateOfBirth         String?
+  averageCycleLength  Int      @default(28)
+  averagePeriodLength Int      @default(5)
+  tryingToConceive    Boolean  @default(false)
+  lastPeriodStart     String?
+  createdAt           DateTime @default(now())
+}
+
+model Cycle {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startDate    String
+  endDate      String?
+  cycleLength  Int?
+  periodLength Int?
+  createdAt    DateTime @default(now())
+}
+
+model PeriodLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      String
+  flow      String?
+  symptoms  String   @default("[]")
+  mood      String?
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+}
+
+model OvulationLog {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date          String
+  confirmed     Boolean  @default(false)
+  bbt           Float?
+  cervicalMucus String?
+  lhSurge       Boolean  @default(false)
+  notes         String?
+  createdAt     DateTime @default(now())
+
+  @@unique([userId, date])
+}
