@@ -106,7 +106,7 @@ export default function InsightsPage() {
             <ResponsiveContainer width="100%" height={Math.max(100, topSymptoms.length * 30)}>
               <BarChart data={topSymptoms} layout="vertical" margin={{ top: 0, right: 10, left: 0, bottom: 0 }}>
                 <XAxis type="number" tick={{ fontSize: 10, fill: '#9ca3af' }} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#6b7280' }} width={130} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#6b7280' }} width={110} />
                 <Tooltip contentStyle={{ borderRadius: 12, border: '1px solid #e5e7eb', fontSize: 12 }} formatter={(v) => [`${v}×`, 'Logged']} />
                 <Bar dataKey="count" radius={[0, 6, 6, 0]}>
                   {topSymptoms.map((_, i) => <Cell key={i} fill={i === 0 ? '#7c3aed' : i === 1 ? '#a855f7' : '#c084fc'} />)}

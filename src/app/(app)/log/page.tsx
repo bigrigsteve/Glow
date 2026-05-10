@@ -40,11 +40,11 @@ const FLOWS: { key: FlowLevel; label: string; color: string }[] = [
   { key: 'heavy', label: 'Heavy', color: 'bg-rose-600 text-white border-rose-600' },
 ]
 const MUCUS: { key: CervicalMucus; label: string; desc: string }[] = [
-  { key: 'dry', label: 'Dry', desc: 'No discharge' },
-  { key: 'sticky', label: 'Sticky', desc: 'Thick, clumpy' },
-  { key: 'creamy', label: 'Creamy', desc: 'Lotion-like' },
-  { key: 'watery', label: 'Watery', desc: 'Clear, wet' },
-  { key: 'egg_white', label: 'Egg white', desc: 'Stretchy, clear' },
+  { key: 'dry', label: 'Dry', desc: 'None' },
+  { key: 'sticky', label: 'Sticky', desc: 'Thick' },
+  { key: 'creamy', label: 'Creamy', desc: 'Lotion' },
+  { key: 'watery', label: 'Watery', desc: 'Wet' },
+  { key: 'egg_white', label: 'Egg white', desc: 'Stretchy' },
 ]
 
 function addDays(date: Date, n: number) { const d = new Date(date); d.setDate(d.getDate() + n); return d }
@@ -152,7 +152,7 @@ function LogContent() {
                   <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Flow</p>
                   <div className="flex gap-2">
                     {FLOWS.map(({ key, label, color }) => (
-                      <button key={key} type="button" onClick={() => setFlow(key)} className={cn('flex-1 py-2 rounded-xl text-xs font-medium border transition-all', flow === key ? color : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100')}>{label}</button>
+                      <button key={key} type="button" onClick={() => setFlow(key)} className={cn('flex-1 py-3 rounded-xl text-xs font-medium border transition-all', flow === key ? color : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-gray-100')}>{label}</button>
                     ))}
                   </div>
                 </div>
@@ -207,9 +207,9 @@ function LogContent() {
                 <p className="text-sm font-medium text-gray-700 mb-2">Cervical Mucus</p>
                 <div className="grid grid-cols-5 gap-1.5">
                   {MUCUS.map(({ key, label, desc }) => (
-                    <button key={key} type="button" onClick={() => setCervicalMucus(cervicalMucus === key ? null : key)} className={cn('flex flex-col items-center gap-0.5 py-2 px-1 rounded-xl border text-center transition-all', cervicalMucus === key ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100')}>
-                      <span className="text-xs font-medium leading-tight">{label}</span>
-                      <span className="text-[9px] text-gray-400 leading-tight">{desc}</span>
+                    <button key={key} type="button" onClick={() => setCervicalMucus(cervicalMucus === key ? null : key)} className={cn('flex flex-col items-center gap-0.5 py-3 px-1 rounded-xl border text-center transition-all min-h-[52px]', cervicalMucus === key ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100')}>
+                      <span className="text-[11px] font-medium leading-tight">{label}</span>
+                      <span className="text-[10px] text-gray-400 leading-tight">{desc}</span>
                     </button>
                   ))}
                 </div>
