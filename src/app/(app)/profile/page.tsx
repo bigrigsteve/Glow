@@ -57,7 +57,7 @@ export default function ProfilePage() {
         name,
         dateOfBirth: dob || null,
         lastPeriodStart: lastPeriodStart || null,
-        averageCycleLength: Math.max(20, Math.min(45, parseInt(avgCycleLen) || 28)),
+        averageCycleLength: Math.max(20, Math.min(60, parseInt(avgCycleLen) || 28)),
         averagePeriodLength: Math.max(2, Math.min(10, parseInt(avgPeriodLen) || 5)),
         tryingToConceive: ttc,
       }),
@@ -105,10 +105,10 @@ export default function ProfilePage() {
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1.5">Avg cycle length</label>
                 <div className="flex items-center gap-2">
-                  <input type="range" min={20} max={45} value={avgCycleLen} onChange={e => setAvgCycleLen(e.target.value)} className="flex-1 accent-violet-600" />
+                  <input type="range" min={20} max={60} value={avgCycleLen} onChange={e => setAvgCycleLen(e.target.value)} className="flex-1 accent-violet-600" />
                   <span className="text-sm font-semibold text-violet-700 w-10 text-right">{avgCycleLen}d</span>
                 </div>
-                <p className="text-xs text-gray-400 mt-0.5">Typical: 21–35 days</p>
+                <p className="text-xs text-gray-400 mt-0.5">Typical: 21–45 days</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1.5">Avg period length</label>
