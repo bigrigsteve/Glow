@@ -8,7 +8,7 @@ export async function GET() {
 
   const userId = session.user.id
 
-  const [cycles, logs, profile] = await Promise.all([
+  const [cycles, logs, profile, ovulationLogs] = await Promise.all([
     prisma.cycle.findMany({
       where: { userId },
       orderBy: { startDate: 'desc' },
@@ -20,6 +20,12 @@ export async function GET() {
       take: 90,
     }),
     prisma.profile.findUnique({ where: { userId } }),
+    prisma.ovulationLog.findMany({
+      where: { userId },
+      orderBy: { date: 'desc' },
+      take: 120,
+      select: { date: true, confirmed: true, lhSurge: true, bbt: true },
+    }),
   ])
 
   const parsedLogs = logs.map((l) => ({
@@ -30,6 +36,7 @@ export async function GET() {
   return Response.json({
     cycles,
     logs: parsedLogs,
+    ovulationLogs,
     profile: profile
       ? {
           averageCycleLength: profile.averageCycleLength,

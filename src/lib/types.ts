@@ -72,6 +72,21 @@ export interface PhaseInfo {
   exercise: string
 }
 
+export interface PatternInsight {
+  averageOvulationDay: number | null
+  averageLutealPhase: number | null
+  shortLutealPhase: boolean
+  delayedOvulation: boolean
+  cyclesStabilizing: boolean | null
+  irregularCycles: boolean
+  longCycles: boolean
+  stdDev: number
+  anovulatoryCycleCount: number
+  totalCyclesAnalyzed: number
+  ovulationDataCycles: number
+  potentialPcosPattern: boolean
+}
+
 export interface DayLog {
   date: string
   isPeriod: boolean

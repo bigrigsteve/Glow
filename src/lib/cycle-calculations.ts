@@ -1,4 +1,4 @@
-import type { Cycle, CyclePhase, CyclePrediction, PhaseInfo } from './types'
+import type { Cycle, CyclePhase, CyclePrediction, PhaseInfo, PatternInsight } from './types'
 import { parseDateString } from './utils'
 
 export function calculateCyclePredictions(
@@ -159,6 +159,110 @@ export function getFertilityScore(cycleDay: number, cycleLength: number): number
   if (daysFromOvulation === -4) return 45
   if (daysFromOvulation === -5) return 25
   return 5
+}
+
+interface OvulationLogEntry {
+  date: string
+  confirmed: boolean
+  lhSurge: boolean
+  bbt: number | null
+}
+
+interface CycleEntry {
+  startDate: string
+  endDate: string | null
+  cycleLength: number | null
+}
+
+function stdDevOf(nums: number[]): number {
+  if (nums.length === 0) return 0
+  const mean = nums.reduce((s, n) => s + n, 0) / nums.length
+  return Math.sqrt(nums.reduce((s, n) => s + Math.pow(n - mean, 2), 0) / nums.length)
+}
+
+export function calculatePatternInsights(
+  cycles: CycleEntry[],
+  ovulationLogs: OvulationLogEntry[],
+  avgCycleLength: number
+): PatternInsight {
+  const MS_PER_DAY = 1000 * 60 * 60 * 24
+  const validCycles = cycles.filter((c) => c.cycleLength !== null)
+  const totalCyclesAnalyzed = validCycles.length
+
+  const lengths = validCycles.map((c) => c.cycleLength as number)
+  const avg = lengths.length > 0 ? lengths.reduce((s, l) => s + l, 0) / lengths.length : avgCycleLength
+  const stdDev = Math.round(stdDevOf(lengths) * 10) / 10
+
+  // Map ovulation events (confirmed OR LH surge) to their cycle day and luteal phase
+  const ovulationCycleDays: number[] = []
+  const lutealPhases: number[] = []
+  const positiveOvulationCycles = new Set<string>()
+  const anyOvulationDataCycles = new Set<string>()
+
+  for (const ovLog of ovulationLogs) {
+    const ovDate = new Date(ovLog.date)
+    for (const cycle of validCycles) {
+      const cycleStart = new Date(cycle.startDate)
+      const cycleLength = cycle.cycleLength as number
+      const cycleEnd = new Date(cycleStart)
+      cycleEnd.setDate(cycleEnd.getDate() + cycleLength)
+
+      if (ovDate >= cycleStart && ovDate < cycleEnd) {
+        anyOvulationDataCycles.add(cycle.startDate)
+        if (ovLog.confirmed || ovLog.lhSurge) {
+          const cycleDay = Math.round((ovDate.getTime() - cycleStart.getTime()) / MS_PER_DAY) + 1
+          ovulationCycleDays.push(cycleDay)
+          lutealPhases.push(cycleLength - cycleDay)
+          positiveOvulationCycles.add(cycle.startDate)
+        }
+        break
+      }
+    }
+  }
+
+  const averageOvulationDay =
+    ovulationCycleDays.length > 0
+      ? Math.round(ovulationCycleDays.reduce((s, d) => s + d, 0) / ovulationCycleDays.length)
+      : null
+
+  const averageLutealPhase =
+    lutealPhases.length > 0
+      ? Math.round(lutealPhases.reduce((s, l) => s + l, 0) / lutealPhases.length)
+      : null
+
+  const expectedOvulationDay = Math.round(avgCycleLength - 14)
+  const shortLutealPhase = averageLutealPhase !== null && averageLutealPhase < 10
+  const delayedOvulation =
+    averageOvulationDay !== null ? averageOvulationDay > expectedOvulationDay + 3 : avg > 35
+
+  // Stabilizing: compare stdDev of most recent 3 cycles vs prior 3
+  let cyclesStabilizing: boolean | null = null
+  if (lengths.length >= 6) {
+    const recentStdDev = stdDevOf(lengths.slice(0, 3))
+    const olderStdDev = stdDevOf(lengths.slice(3, 6))
+    cyclesStabilizing = recentStdDev < olderStdDev - 0.5
+  }
+
+  const irregularCycles = stdDev > 7
+  const longCycles = avg > 35
+  const anovulatoryCycleCount = anyOvulationDataCycles.size - positiveOvulationCycles.size
+  const potentialPcosPattern =
+    (longCycles || irregularCycles) && (delayedOvulation || anovulatoryCycleCount >= 2)
+
+  return {
+    averageOvulationDay,
+    averageLutealPhase,
+    shortLutealPhase,
+    delayedOvulation,
+    cyclesStabilizing,
+    irregularCycles,
+    longCycles,
+    stdDev,
+    anovulatoryCycleCount,
+    totalCyclesAnalyzed,
+    ovulationDataCycles: positiveOvulationCycles.size,
+    potentialPcosPattern,
+  }
 }
 
 export function getFertileDaysInMonth(
